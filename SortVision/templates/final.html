@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Finał</title>
+</head>
+<body>
+    <h1>Finał</h1>
+
+    <h2>Kraje</h2>
+    <ul>
+        {% for kraj in kraje %}
+        <li>{{ kraj.nazwa }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Przyznaj Punkty Jury</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" name="jury_form">Przyznaj Punkty Jury</button>
+    </form>
+
+    <h2>Głosowanie Widzów</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ widzowie_form.as_p }}
+        <button type="submit" name="widzowie_form">Przyznaj Punkty Widzów</button>
+    </form>
+
+    <h2>Wyniki Jury</h2>
+    <ul>
+        {% for punktacja in punktacje_jury %}
+        <li>{{ punktacja.kraj.nazwa }}: {{ punktacja.punkty }} punktów od {{ punktacja.przyznajacy_kraj.nazwa }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Wyniki Widzowie</h2>
+    <ul>
+        {% for punktacja in punktacje_widzowie %}
+        <li>{{ punktacja.kraj.nazwa }}: {{ punktacja.punkty }} punktów</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

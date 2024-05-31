@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+         <div class="container">
+            <div class="row">
+               <div class="col-md-8">
+                <h1>Lista Krajów</h1>
+                    <ul>
+                    {% for kraj in kraje %}
+                    <li>{{ kraj.nazwa }}</li>
+                    {% endfor %}
+                    </ul>
+               </div>
+               <div class="col-md-4">
+
+               </div>
+            </div>
+         </div>
+
+{% endblock %}
+
