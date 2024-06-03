@@ -3,16 +3,31 @@
 {% block content %}
          <div class="container">
             <div class="row">
-               <div class="col-md-8">
-                <h1>Lista Krajów</h1>
-                    <ul>
-                    {% for kraj in kraje %}
-                    <li>{{ kraj.nazwa }}</li>
-                    {% endfor %}
-                    </ul>
-               </div>
                <div class="col-md-4">
+                <h1>Lista Krajów</h1>
+                   <br>
+                    <ol>
+                    {% for kraj in kraje %}
+                    <li>
+                        {% if kraj.zdjecie %}
+                            <img src="{{ kraj.zdjecie.url }}" alt="{{ kraj.nazwa }}" width="60" height="40">
+                        {% endif %}
+                    {{ kraj.nazwa }}
+                    </li>
+                    {% endfor %}
+                    </ol>
 
+
+               </div>
+                <div class="col-md-4">
+                   {% if user.is_authenticated %}
+                    <button onclick="window.location.href='{% url 'kraj_new' %}'" class="btn btn-primary">Dodaj/Edytuj kraj</button>
+                    {% endif %}
+               </div>
+                <div class="col-md-4">
+                   {% if user.is_authenticated %}
+                   <button onclick="window.location.href='{% url 'losuj_polfinaly' %}'" class="btn btn-primary">Rozlosuj Półfinały</button>
+                    {% endif %}
                </div>
             </div>
          </div>
