@@ -19,8 +19,16 @@ def main(request):
 def losuj_polfinaly(request):
     # Sprawdź, czy półfinały zostały już wylosowane
     if 'polfinal1' in request.session and 'polfinal2' in request.session:
-        # Jeśli tak, przekieruj na stronę z potwierdzeniem lub gdziekolwiek indziej
-        return redirect('potwierdzenie_polfinaly')
+        polfinal1_kraje_ids = request.session.get('polfinal1', [])
+        polfinal2_kraje_ids = request.session.get('polfinal2', [])
+
+        polfinal1_kraje = Kraj.objects.filter(id__in=polfinal1_kraje_ids)
+        polfinal2_kraje = Kraj.objects.filter(id__in=polfinal2_kraje_ids)
+
+        return render(request, 'polfinal.html', {
+            'polfinal1_kraje': polfinal1_kraje,
+            'polfinal2_kraje': polfinal2_kraje,
+        })
 
     kraje = list(Kraj.objects.all())
     random.shuffle(kraje)
@@ -43,7 +51,7 @@ def losuj_polfinaly(request):
     request.session['polfinal1'] = [kraj.id for kraj in polfinal1_kraje]
     request.session['polfinal2'] = [kraj.id for kraj in polfinal2_kraje]
 
-    return render(request, 'Lista/lista_rozlosowana.html', {
+    return render(request, 'polfinal.html', {
         'polfinal1_kraje': polfinal1_kraje,
         'polfinal2_kraje': polfinal2_kraje,
     })
@@ -112,7 +120,7 @@ def zapisz_polfinaly(request):
         # Redirect to a confirmation page or the main page
         return redirect(reverse('potwierdzenie_polfinaly'))
 
-    return redirect(reverse('lista_rozlosowana'))
+    return redirect(reverse('potwierdzenie_polfinaly'))
 
 def final(request):
     final = Final.objects.first()

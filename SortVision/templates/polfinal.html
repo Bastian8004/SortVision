@@ -52,7 +52,7 @@
                      </div>
                      <div class="col-md-4">
                         <ul class="right_icon d_none1">
-                           <a href="#" class="order">Logowanie</a>
+                           <a href="http://127.0.0.1:8000/admin" class="order">Logowanie</a>
                         </ul>
                      </div>
                   </div>
@@ -90,24 +90,14 @@
                <div class="col-md-12 margin_top40">
                   <div class="row d_flex">
                      <div class="col-md-4">
-                        <h2><a href="{% url 'polfinal_detail' polfinal_num=1 %}">Półfinał 1</a></h2>
-                        <ol>
-                                {% for kraj in polfinal1_kraje %}
-                                    <li>{% if kraj.zdjecie %}
-                                        <img src="{{ kraj.zdjecie.url }}" alt="{{ kraj.nazwa }}" width="60" height="40">
-                                        {% endif %}{{ kraj.nazwa }}</li>
-                                {% endfor %}
-                            </ol>
+                        {% if user.is_authenticated %}
+                    <button onclick="window.location.href='{% url 'polfinal_detail' polfinal_num=1 %}'" class="btn btn-primary">Półfinał 1</button>
+                    {% endif %}
                      </div>
                      <div class="col-md-4">
-                        <h2><a href="{% url 'polfinal_detail' polfinal_num=2 %}">Półfinał 2</a></h2>
-                                                    <ol>
-                                {% for kraj in polfinal2_kraje %}
-                                    <li>{% if kraj.zdjecie %}
-                                        <img src="{{ kraj.zdjecie.url }}" alt="{{ kraj.nazwa }}" width="60" height="40">
-                                        {% endif %}{{ kraj.nazwa }}</li>
-                                {% endfor %}
-                            </ol>
+                        {% if user.is_authenticated %}
+                    <button onclick="window.location.href='{% url 'polfinal_detail' polfinal_num=2 %}'" class="btn btn-primary">Półfinał 2</button>
+                    {% endif %}
                      </div>
                   </div>
                </div>
