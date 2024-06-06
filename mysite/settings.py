@@ -99,8 +99,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIR = (os.path.join(BASE_DIR, 'static'),)
 
 MEDIA_URL = '/media/'
-#MEDIA_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['media/']))
-MEDIA_ROOT = BASE_DIR + '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 
 LOGGING = {
     'version': 1,

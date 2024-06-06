@@ -4,6 +4,7 @@
          <div class="container">
             <div class="row">
                <div class="col-md-4">
+                   <br>
                 <h1>Lista Krajów</h1>
                    <br>
                     <ol>
@@ -20,11 +21,15 @@
 
                </div>
                 <div class="col-md-4">
+                    <br>
+                    <br>
                    {% if user.is_authenticated %}
                     <button onclick="window.location.href='{% url 'kraj_new' %}'" class="btn btn-primary">Dodaj/Edytuj kraj</button>
                     {% endif %}
                </div>
                 <div class="col-md-4">
+                    <br>
+                    <br>
                    {% if user.is_authenticated %}
                    <button onclick="window.location.href='{% url 'losuj_polfinaly' %}'" class="btn btn-primary">Rozlosuj Półfinały</button>
                     {% endif %}

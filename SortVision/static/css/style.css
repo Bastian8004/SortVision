@@ -479,7 +479,7 @@ ul.right_icon li img {
 
 .banner_main {
      background: url(../images/banner.jpg);
-     padding: 97px 0px 0px 0px;
+     padding: 0px 0px 0px 0px;
      background-size: 100% 100%;
      background-repeat: no-repeat;
      min-height: 698px;
@@ -705,7 +705,7 @@ margin: 0 15px 20px 15px;
 
 .news {
      background-color: #fff;
-     padding-top: 90px;
+     padding-top: 40px;
 }
 
 .news .titlepage h2 {
