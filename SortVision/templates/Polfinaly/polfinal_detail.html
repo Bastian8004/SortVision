@@ -12,7 +12,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12 margin_top40">
-                   <table>
+                   <table id="countriesTable">
                        <tr>
                            <th></th>
                            <th></th>
@@ -22,26 +22,47 @@
                            <th></th>
                            <th>Punkty</th>
                        </tr>
-                       {% for kraj in kraje %}
+                       {% for item in kraje %}
                        <tr>
-                           <th>{{ forloop.counter }}</th>
-                           <th></th>
-                           <th>{% if kraj.zdjecie %}
-                                    <img src="{{ kraj.zdjecie.url }}" alt="{{ kraj.nazwa }}" width="60" height="40">
-                                {% endif %}</th>
-                           <th></th>
-                           <th>{{ kraj.nazwa }}</th>
-                           <th></th>
-                           <th>{{ kraj.punkty }}</th>
+                           <td>{{ forloop.counter }}</td>
+                           <td></td>
+                           <td>{% if item.kraj.zdjecie %}
+                                    <img src="{{ item.kraj.zdjecie.url }}" alt="{{ item.kraj.nazwa }}" width="60" height="40">
+                                {% endif %}</td>
+                           <td></td>
+                           <td>{{ item.kraj.nazwa }}</td>
+                           <td></td>
+                           <td>{{ item.punkty }}</td>
                        </tr>
                        {% endfor %}
                    </table>
                 </div>
                 <div class="col-md-12 margin_top40">
-                    <h1>Głosowanie</h1>
+                    {% if current_kraj %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <h1>Głosowanie Jury</h1>
+                            <h3>Punkty przyznaje: {{ current_kraj.nazwa }}</h3>
+                            <ol>
+                                <li>1pkt - {{ form.points_1 }}</li>
+                                <li>2pkt - {{ form.points_2 }}</li>
+                                <li>3pkt - {{ form.points_3 }}</li>
+                                <li>4pkt - {{ form.points_4 }}</li>
+                                <li>5pkt - {{ form.points_5 }}</li>
+                                <li>6pkt - {{ form.points_6 }}</li>
+                                <li>7pkt - {{ form.points_7 }}</li>
+                                <li>8pkt - {{ form.points_8 }}</li>
+                                <li>10pkt - {{ form.points_10 }}</li>
+                                <li>12pkt - {{ form.points_12 }}</li>
+                            </ol>
+                            <button type="submit" class="btn btn-primary">Prześlij punkty</button>
+                        </form>
+                    {% else %}
+                        <p>Wszystkie kraje oddały swoje głosy.</p>
+                    {% endif %}
                 </div>
                 <div class="col-md-12 margin_top40">
-                    <h1>Lista zakwalifikowanych do finału</h1>
+                    <h1>Głosowanie widzów</h1>
                 </div>
             </div>
         </div>

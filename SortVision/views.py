@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.urls import reverse
-from .models import Main, Kraj, Polfinal, Final, PunktacjaJury, PunktacjaWidzowie
-from .forms import PunktacjaJuryForm, PunktacjaWidzowieForm, ListaForm
+from .models import Main, Kraj, Polfinal, Final
+from .forms import ListaForm, JuryGlosowanieForm
 import random
 import logging
 from django.db import transaction
@@ -67,15 +67,78 @@ def losuj_polfinaly(request):
     return redirect('polfinal')
 
 
+from django.db.models import F
+
+def polfinal_vote(request, polfinal_num, kraj_id, points):
+    if request.method == "POST":
+        kraj = Kraj.objects.get(pk=kraj_id)
+        polfinal = Polfinal.objects.get(polfinal=polfinal_num, kraj=kraj)
+        polfinal.punkty = F('punkty') + points
+        polfinal.save()
+
+    return redirect('polfinal_detail', polfinal_num=polfinal_num)
+
+
 def polfinal_detail(request, polfinal_num):
-    # Pobierz kraje z bazy danych dla odpowiedniego półfinału
-    polfinal_kraje = Polfinal.objects.filter(polfinal=polfinal_num).select_related('kraj')
+    # Pobierz indeks kraju, który aktualnie oddaje głosy
+    current_index = request.session.get('current_index', 0)
+
+    # Pobierz listę krajów z danego półfinału
+    polfinal_kraje = Polfinal.objects.filter(polfinal=polfinal_num).select_related('kraj').order_by('-punkty')
     kraje = [p.kraj for p in polfinal_kraje]
+
+    # Pobierz aktualny kraj, który oddaje głosy
+    if current_index < len(kraje):
+        current_kraj = kraje[current_index]
+    else:
+        current_kraj = None
+
+    if request.method == 'POST' and current_kraj:
+        form = JuryGlosowanieForm(kraje, current_kraj, request.POST)
+        if form.is_valid():
+            # Pobierz dane z formularza i przetwórz punkty
+            points_map = {
+                'points_1': 1,
+                'points_2': 2,
+                'points_3': 3,
+                'points_4': 4,
+                'points_5': 5,
+                'points_6': 6,
+                'points_7': 7,
+                'points_8': 8,
+                'points_10': 10,
+                'points_12': 12
+            }
+
+            with transaction.atomic():
+                for field, points in points_map.items():
+                    kraj_id = form.cleaned_data.get(field)
+                    if kraj_id:
+                        Polfinal.objects.filter(polfinal=polfinal_num, kraj_id=kraj_id).update(punkty=F('punkty') + points)
+
+            # Zwiększ indeks, aby kolejny kraj mógł oddać głosy
+            current_index += 1
+            request.session['current_index'] = current_index
+
+            # Przekieruj do tego samego widoku, aby zresetować formularz i odświeżyć dane
+            return redirect('polfinal_detail', polfinal_num=polfinal_num)
+
+    else:
+        form = JuryGlosowanieForm(kraje, current_kraj)
+
+    # Pobierz zaktualizowaną listę krajów z danego półfinału (aby odświeżyć dane w tabeli)
+    polfinal_kraje = Polfinal.objects.filter(polfinal=polfinal_num).select_related('kraj').order_by('-punkty')
+    kraje_z_punktami = [{'kraj': p.kraj, 'punkty': p.punkty} for p in polfinal_kraje]
 
     return render(request, 'Polfinaly/polfinal_detail.html', {
         'polfinal_num': polfinal_num,
-        'kraje': kraje,
+        'kraje': kraje_z_punktami,
+        'current_kraj': current_kraj,
+        'form': form if current_kraj else None,
     })
+
+
+
 
 def polfinal(request):
     polfinal1_kraje = Polfinal.objects.filter(polfinal='1').select_related('kraj')
@@ -96,64 +159,6 @@ def polfinal2(request):
     return redirect('polfinal_detail', polfinal_num='2')
 
 
-@transaction.atomic
-def zapisz_polfinaly(request):
-    if request.method == 'POST':
-        polfinal1_ids = request.session.get('polfinal1', [])
-        polfinal2_ids = request.session.get('polfinal2', [])
-
-        polfinal1_kraje = Kraj.objects.filter(id__in=polfinal1_ids)
-        polfinal2_kraje = Kraj.objects.filter(id__in=polfinal2_ids)
-
-        # Clear previous assignments
-        Polfinal.objects.all().delete()
-
-        # Assign countries to Polfinal instances
-        for kraj in polfinal1_kraje:
-            Polfinal.objects.create(kraj=kraj, polfinal=1)
-
-        for kraj in polfinal2_kraje:
-            Polfinal.objects.create(kraj=kraj, polfinal=2)
-
-        # Redirect to a confirmation page or the main page
-        return redirect(reverse('potwierdzenie_polfinaly'))
-
-    return redirect(reverse('potwierdzenie_polfinaly'))
-
-def potwierdzenie_polfinaly(request):
-    return render(request, 'polfinal.html')
-
 def final(request):
     final = Final.objects.first()
     kraje = final.kraje.all()
-
-    if request.method == "POST":
-        if 'jury_form' in request.POST:
-            form = PunktacjaJuryForm(request.POST)
-            if form.is_valid():
-                punktacja = form.save(commit=False)
-                punktacja.final = final
-                punktacja.save()
-                return redirect('final')
-        elif 'widzowie_form' in request.POST:
-            widzowie_form = PunktacjaWidzowieForm(request.POST)
-            if widzowie_form.is_valid():
-                punktacja = widzowie_form.save(commit=False)
-                punktacja.final = final
-                punktacja.save()
-                return redirect('final')
-    else:
-        form = PunktacjaJuryForm()
-        widzowie_form = PunktacjaWidzowieForm()
-
-    punktacje_jury = PunktacjaJury.objects.filter(final=final).order_by('-punkty')
-    punktacje_widzowie = PunktacjaWidzowie.objects.filter(final=final).order_by('-punkty')
-
-    return render(request, 'final.html', {
-        'kraje': kraje,
-        'form': form,
-        'widzowie_form': widzowie_form,
-        'punktacje_jury': punktacje_jury,
-        'punktacje_widzowie': punktacje_widzowie,
-    })
-
